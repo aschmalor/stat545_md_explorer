@@ -1,0 +1,185 @@
+---
+title: 'cm005: `dplyr` Exercise'
+output: 
+  html_document:
+    keep_md: yes
+---
+
+**Optional, but recommended startup**:
+
+Change the file output to both html and md _documents_ (not notebook).
+
+# Intro to `dplyr` syntax
+
+1. Load the `gapminder` and `tidyverse` packages. Hint: `suppressPackageStartupMessages()`!
+    - This loads `dplyr`, too.
+2. `knit` the document. 
+
+```{r}
+library(gapminder)
+library(tidyverse)
+```
+
+
+## `select()`
+
+1. Make a data frame containing the columns `year`, `lifeExp`, `country` from the gapminder data, in that order.
+
+Ctrl Alt I to create new coding chunk
+```{r}
+select(gapminder, year, lifeExp, country)
+head(gapminder)
+```
+
+2. Select all variables, from `country` to `lifeExp`. 
+```{r}
+select(gapminder, country:lifeExp)
+head(gapminder)
+```
+
+
+
+3. Select all variables, except `lifeExp`.
+```{r}
+select(gapminder, -lifeExp)
+```
+if you don't capture the output of the function, everything stays as is
+select is only returning the modified output but it's not stored anywhere
+to store:
+```{r}
+a<-select(gapminder, -lifeExp)
+head(a)
+```
+
+
+4. Put `continent` first. Hint: use the `everything()` function.
+```{r}
+select(gapminder, continent, everything())
+```
+
+5. Rename `continent` to `cont`.
+```{r}
+rename(gapminder, cont=continent)
+#to store:
+  b<-rename(gapminder, cont=continent)
+  b
+```
+
+## `arrange()`
+
+1. Order by year.
+```{r}
+arrange(gapminder, lifeExp)#default: ascending
+arrange(gapminder, desc(lifeExp))
+```
+
+2. Order by year, in descending order.
+```{r}
+arrange(gapminder, desc(lifeExp))
+```
+
+3. Order by year, then by life expectancy.
+```{r}
+arrange(gapminder, year, lifeExp)#first ordered by year and then by life Exp., goes down the list
+```
+
+
+## Piping, `%>%`
+
+Note: think of `%>%` as the word "then"!
+
+1. Combine `select()` Task 1 with `arrange()` Task 3.
+
+```{r}
+gapminder %>%
+  select(year, lifeExp, country)%>% #no need to call gapminder again, taes from previous function
+  arrange(year, lifeExp)
+#1. took gapminder data set
+#2. select 3 variables
+#3. arrange in a certain order
+#tidyverse strives for a self-documenting code; i.e., the code is self-explanatory
+
+#to store it all:
+b<-gapminder %>%
+  select(year, lifeExp, country)%>% #no need to call gapminder again, taes from previous function
+  arrange(year, lifeExp)
+
+
+#by default whenever you use ipng, the output of the first function will be pt in the first place 
+#i.e., data of the next function, so here in the select function it really says gapminder first
+#way to avoid
+#f(a=3, b=.)
+```
+
+
+## `filter()`
+
+1. Only take data with population greater than 100 million.
+```{r}
+gapminder%>%
+  filter(pop>100000000)
+
+gapminder%>%
+  filter(!(pop>100000000))#this now menas NOT >100000000, so same as <=
+
+```
+
+2. Of those, only take data from Asia.
+
+## git stuff (Optional)
+
+Knit, commit, push!
+
+# Break/Challenge: metaprogramming
+
+Here's an activity for you to do during the break, in case you're all caught up. It should help you understand metaprogramming a bit more.
+
+Suppose you're the instructor of an R programming course. You write an assignment question to evaluate whether students can write an `if` statement, for which an answer to the question looks something like this:
+
+```
+my_commute <- 60
+if (my_commute > 30) {
+    print("That's a long commute!")
+} else {
+    print("That's a short commute.")
+}
+```
+
+Your task is to use metaprogramming to check whether a response (like the one above) works and contains an `if` statement. You should roughly follow these steps, using [adv-r: expressions](https://adv-r.hadley.nz/expressions.html) as a resource (especially Section 18.1).
+
+1. Wrap the above block of code in the `expr()` function from the `rlang` package.
+2. Use the `eval()` function to execute the code, to see if the code runs.
+3. Use the `as.character()` function to check whether this response contains an `if` statement.
+
+# Relational/Comparison and Logical Operators in R
+
+1. Find all entries of Canada and Algeria occuring in the '60s. 
+
+```{r}
+gapminder%>%
+  filter((country=="Canada" |country=="Algeria") & year >=1960 & year < 1970)
+
+
+gapminder%>%
+  filter(country %in% c("Canada", "Algeria"),
+         year >=1960,
+          year < 1970)
+```
+
+
+
+
+2. Find all entries of Canada, and entries of Algeria occuring in the '60s. 
+3. Find all entries _not_ including Canada and Algeria.
+
+# Bonus Exercises
+
+If there's time remaining, we'll practice with these three exercises. I'll give you 1 minute for each, then we'll go over the answer.
+
+1. Take all countries in Europe that have a GDP per capita greater than 10000, and select all variables except `gdpPercap`. (Hint: use `-`).
+
+2. Take the first three columns, and extract the names.
+
+3. Of the `iris` data frame, take all columns that start with the word "Petal". 
+    - Hint: take a look at the "Select helpers" documentation by running the following code: `?tidyselect::select_helpers`.
+    - Exercise from [r-exercises](https://www.r-exercises.com/2017/10/19/dplyr-basic-functions-exercises/).
