@@ -2,7 +2,9 @@
 title: "Lecture 7"
 author: "Anita"
 date: "September 25, 2018"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 ---
 title: "cm007 Exercises: Exploring Aesthetic Mappings"
@@ -11,9 +13,27 @@ editor_options:
   chunk_output_type: inline
 ---
 
-```{r}
+
+```r
 library(gapminder)
 library(tidyverse)
+```
+
+```
+## -- Attaching packages ------------------------------------------------------------------------- tidyverse 1.2.1 --
+```
+
+```
+## v ggplot2 3.0.0     v purrr   0.2.5
+## v tibble  1.4.2     v dplyr   0.7.6
+## v tidyr   0.8.1     v stringr 1.3.1
+## v readr   1.1.1     v forcats 0.3.0
+```
+
+```
+## -- Conflicts ---------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
 ```
 
 
@@ -23,22 +43,38 @@ Switch focus to exploring aesthetic mappings, instead of geoms.
 
 ## Shapes
 
-```{r}
+
+```r
 gvsl <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
   scale_x_log10()
 gvsl + geom_point(aes(shape=continent))
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 - Try a scatterplot of `gdpPercap` vs `pop` with a categorical variable (continent) as `shape`.
 - As with all (?) aesthetics, we can also have them _not_ as aesthetics!
     - Try some shapes: first as integer from 0-24, then as keyboard characters.
     - What's up with `pch`?
 
-```{r}
+
+```r
 gvsl + geom_point(shape=7)
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 gvsl + geom_point(pch=7)
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
+
+```r
 gvsl + geom_point(shape = '$')
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
 
 List of shapes can be found [at the bottom of the `scale_shape` documentation](https://ggplot2.tidyverse.org/reference/scale_shape.html).
 
@@ -48,23 +84,33 @@ Make a scatterplot. Then:
 
 - Try colour as categorical variable.
 
-```{r}
+
+```r
 gvsl + geom_point(aes(color = continent))
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 - Try `colour` and `color`. 
 - Try colour as numeric variable.
 *the darker the shade, the larger the population
-```{r}
-gvsl + geom_point(aes(color = pop))
 
+```r
+gvsl + geom_point(aes(color = pop))
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
     - Try `trans="log10"` for log scale.
 *the more blue the larger the population
-```{r}
-gvsl + geom_point(aes(color = pop)) + scale_color_continuous(trans="log10")
 
+```r
+gvsl + geom_point(aes(color = pop)) + scale_color_continuous(trans="log10")
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
 #now let's color by life exp. gretaer than 60
 #ggplot under hood makes new column with Trues and Falses
 #and then it takes new variable and maps it onto color
@@ -72,13 +118,25 @@ gvsl + geom_point(aes(color = pop)) + scale_color_continuous(trans="log10")
 gvsl + geom_point(aes(color = lifeExp>60))
 ```
 
+![](cm007-exercise_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
+
 Make a line plot of `gdpPercap` over time for all countries. Colour by `lifeExp > 60` (remember that `lifeExp` looks bimodal?)
 
 
 Try adding colour to a histogram. How is this different?
-```{r}
+
+```r
 ggplot(gapminder, aes(lifeExp)) + 
   geom_histogram(aes(fill=continent))
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+```r
 #example of overplotting (too much information on one plot)
 #e.g., does red color go all the way to bottom? can't tell from plot
 ```
@@ -86,31 +144,59 @@ ggplot(gapminder, aes(lifeExp)) +
 ## Facetting
 
 Make histograms of `gdpPercap` for each continent. Try the `scales` and `ncol` arguments. 
-```{r}
+
+```r
 #make a plot for every category (here: 5 continents)
 ggplot(gapminder, aes(lifeExp)) +
   facet_wrap(~ continent) +
   geom_histogram()
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+```r
 #here: X axis all the same
 
 #I can free this up:
 ggplot(gapminder, aes(lifeExp)) +
   facet_wrap(~ continent, scales = 'free_x') +
   geom_histogram()
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-8-2.png)<!-- -->
+
+```r
 #in this case this makes it harder to compare the graphs but may be useful in other situations
 ```
 
 
 Remove Oceania. Add another variable: `lifeExp > 60`. 
 
-```{r}
+
+```r
 ggplot(gapminder, aes(gdpPercap)) +
   facet_grid(continent ~ lifeExp > 60) +
   geom_histogram()
+```
+
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
 #here we have the 5 continents and then show gdp depending on life exp.
 
 #we can change x axis so t is on a log scale
-
 ```
 
 
@@ -119,12 +205,23 @@ ggplot(gapminder, aes(gdpPercap)) +
 
 - Add a `size` aesthetic to a scatterplot. What about `cex`?
 
-```{r}
+
+```r
 gvsl + geom_point(aes(size = pop), alpha=0.2)
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
+```r
 #the size it is mapped to is not really meaningful
 #make proportional to pouplation
 gvsl + geom_point(aes(size = pop), alpha=0.2) +
   scale_size_area()
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
+
+```r
 #now the size of the bubbles are proportional to the size of the population
 ```
 
@@ -132,10 +229,13 @@ gvsl + geom_point(aes(size = pop), alpha=0.2) +
 - Try adding `scale_radius()` and `scale_size_area()`. What's better?
 - Use `shape=21` to distinguish between `fill` (interior) and `colour` (exterior).
 
-```{r}
+
+```r
 #shape NOT in aes, fill = continent
 gvsl + geom_point(aes(size = pop, fill=continent), shape = 21, color = 'black', alpha=0.2)
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 
 ## "Complete" plot
@@ -146,11 +246,14 @@ Let's try plotting much of the data.
 - facet by year
 - colour by continent
 
-```{r}
+
+```r
 gvsl + geom_point(aes(size=pop, color=continent)) + 
   scale_size_area() + 
   facet_wrap(~year)
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 
 
@@ -164,7 +267,8 @@ Let's see how Rwanda's life expectancy and GDP per capita have evolved over time
 - Add `arrow=arrow()` option.
 - Add `geom_text`, with year label. 
 
-```{r}
+
+```r
 gapminder %>%
   filter(country == "Rwanda") %>%
   arrange(year)%>% #to make sure that ordered by year
@@ -173,7 +277,9 @@ gapminder %>%
   geom_point() +
   geom_line() +
   geom_path(arrow=arrow())
-``` 
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 
 ## Two categorical variables
@@ -184,14 +290,21 @@ Try `cyl` (number of cylinders) ~ `am` (transmission) in the `mtcars` data frame
 - `geom_count()`.
 - `geom_bin2d()`. Compare with `geom_tile()` with `fill` aes.
 
-```{r}
+
+```r
 ggplot(mtcars, aes(factor(cyl), factor(am))) + #need to tell gglot that cyl and am are factors
   #geom_count()
   geom_bin2d()
+```
 
+![](cm007-exercise_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+```r
 ggplot(mtcars, aes(factor(cyl), factor(am))) + #need to tell gglot that cyl and am are factors
   geom_bin2d()
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
 
 
 ## Overplotting
@@ -203,15 +316,35 @@ Try a scatterplot with:
 - `geom_density2d()`
 - `geom_smooth()`
 
-```{r}
+
+```r
 library(hexbin)
 gvsl + geom_hex()
+```
 
+![](cm007-exercise_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
+```r
 gvsl + geom_density2d()
+```
 
+![](cm007-exercise_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
+
+```r
 gvsl + geom_point(alpha = 0.2) + geom_smooth()
+```
+
+```
+## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-15-3.png)<!-- -->
+
+```r
 gvsl + geom_point(alpha = 0.2) + geom_smooth(method="lm")
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-15-4.png)<!-- -->
 
 
 ## Bar plots
@@ -220,12 +353,15 @@ How many countries are in each continent? Use the year 2007.
 
 1. After filtering the gapminder data to 2007, make a bar chart of the number of countries in each continent. Store everything except the geom in the variable `d`.
 
-```{r}
+
+```r
 gapminder %>%
   filter(year==2007) %>%
   ggplot(aes(x=continent)) + #y axis is ount, but ggplot does that under the hood
   geom_bar()
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 
 2. Notice the y-axis. Oddly, `ggplot2` doesn't make it obvious how to change to proportion. Try adding a `y` aesthetic: `y=..count../sum(..count..)`.
@@ -239,9 +375,12 @@ __Uses of bar plots__: Get a sense of relative quantities of categories, or see 
 ## Polar coordinates
 
 - Add `coord_polar()` to a scatterplot.
-```{r}
+
+```r
 gvsl + geom_point() + coord_polar()
 ```
+
+![](cm007-exercise_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 
 # Want more practice?
