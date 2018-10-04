@@ -2,7 +2,9 @@
 title: "cm009"
 author: "Anita"
 date: "October 2, 2018"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ---
@@ -93,8 +95,17 @@ Read these three LOTR csv's, saving them to `lotr1`, `lotr2`, and `lotr3`:
 ```{r}
 lotr1 <- read_csv("https://raw.githubusercontent.com/jennybc/lotr-tidy/master/data/The_Fellowship_Of_The_Ring.csv")
 lotr2 <- read_csv("https://raw.githubusercontent.com/jennybc/lotr-tidy/master/data/The_Two_Towers.csv")
-lotr3 <- read_csv("https://github.com/jennybc/lotr-tidy/blob/master/data/The_Return_Of_The_King.csv")
+lotr3 <- read_csv("https://raw.githubusercontent.com/jennybc/lotr-tidy/master/data/The_Return_Of_The_King.csv")
 ```
+
+
+
+
+tidy is long form data, and untidy is in wide form
+
+I should check lotr1, lotr2, and lotr3 and make sure that the data frames are the same if I want t stack them on top of each other (combine them)
+i.e., same types of variables with same names etc. if this is not the case I first have to do some data wrangling
+
 
 ## `gather()`
 
@@ -105,19 +116,43 @@ This function is useful for making untidy data tidy (so that computers can more 
 1. Combine the three LOTR untidy tables (`lotr1`, `lotr2`, `lotr3`) to a single untidy table by stacking them.  
 
 ```{r}
-
+(lotr_untidy <- bind_rows(lotr1, lotr2, lotr3))
+#looks like it is tidy bt it is not because we ant to combine male and female in one column.
+#this is what long forma means!
 ```
 
 2. Convert to tidy. Also try this by specifying columns as a range, and with the `contains()` function.
 
 ```{r}
+gather(lotr_untidy, key="Gender", value="Words", Female, Male)#that will name the new columns
+#and the Female, Male means that this is what the column will be made of (spred across its own column)
+#Female, and Male are the specified columns that I want to be put in this new column
 
+#key: new line I want to make called gender
+#value: what s in the line, here the word count, i.e., how much words did each individual speak
+#and then behind this I specify which columns of the wide form go in there
+
+
+
+
+
+gather(lotr_untidy, key="Gender", value="Words", Female:Male) 
+#using colons means that I choose the range of columns from Female to Male
+gather(lotr_untidy, key="Gender", value="Words", contains("ale"))
+#include all columns where the name of the column contains the letters "ale"
 ```
 
 3. Try again (bind and tidy the three untidy data frames), but without knowing how many tables there are originally. 
     - The additional work here does not require any additional tools from the tidyverse, but instead uses a `do.call` from base R -- a useful tool in data analysis when the number of "items" is variable/unknown, or quite large. 
 
 ```{r}
+lotr_list <- list(lotr1, lotr2, lotr3)
+lotr_list
+
+#now if we want to bind all of these together, we can se the do.call function
+do.call(bind_rows, lotr_list)
+
+#then from here we can mae it tidy again
 
 ```
 
@@ -136,12 +171,23 @@ lotr_tidy <- read_csv("https://raw.githubusercontent.com/jennybc/lotr-tidy/maste
 Get word counts across "Race". Then try "Gender". 
 
 ```{r}
-
+spread(lotr_tidy, key = "Race", value = "Words")
 ```
 
 Now try combining race and gender. Use `unite()` from `tidyr` instead of `paste()`. 
 
 ```{r}
+lotr_tidy %>%
+  unite(Race_Gender, Race, Gender) %>%
+  spread(key = "Race_Gender", value = "Words")
+#unite function: first command is the name of the new column
+
+
+
+lotr_tidy %>%
+  mutate(x = rnorm(nrow(lotr_tidy))) %>%
+   spread(key = "Gender", value = "x")
+#x is a randomly generated variable
 
 ```
 
@@ -152,31 +198,83 @@ Check out the Examples in the documentation to explore the following.
 `expand` vs `complete` (trim vs keep everything). Together with `nesting`. Check out the Examples in the `expand` documentation.
 
 ```{r}
+?expand
+head(mtcars)
+expand(mtcars, vs, cyl)
 
+#returns a combination of all possible combnations in teh data frame even if it doesn't actually exist in the data frame
+
+
+df <- tibble(
+  year   = c(2010, 2010, 2010, 2010, 2012, 2012, 2012),
+  qtr    = c(   1,    2,    3,    4,    1,    2,    3),
+  return = rnorm(7)
+)
+df
+
+df %>% expand(year, qtr)
+
+
+df %>% expand(year = full_seq(year, 1), qtr)
+df %>% complete(year = full_seq(year, 1), qtr)
+#shows every year even if there is no data
+
+
+
+experiment <- tibble(
+  name = rep(c("Alex", "Robert", "Sam"), c(3, 2, 1)),
+  trt  = rep(c("a", "b", "a"), c(3, 2, 1)),
+  rep = c(1, 2, 3, 1, 2, 1),
+  measurment_1 = runif(6),
+  measurment_2 = runif(6)
+)
+experiment
+#goal is to fill in the stuff that isn't there yet with NA
+
+all <- experiment %>% expand(nesting(name, trt), rep)
+all
 ```
 
 `separate_rows`: useful when you have a variable number of entries in a "cell".
 
 ```{r}
+?separate_rows
 
+df <- data.frame(
+  x = 1:3,
+  y = c("a", "d,e,f", "g,h"),
+  z = c("1", "2,3,4", "5,6"),
+  stringsAsFactors = FALSE
+)
+df
+
+#best way to make it tidy is to enter a new row for each cell
+
+separate_rows(df, y, z, convert = TRUE)
 ```
 
 `unite` and `separate`.
 
 ```{r}
-
+?unite
+?separate
 ```
 
 `uncount` (as the opposite of `dplyr::count()`)
 
 ```{r}
+?uncount
+df <- tibble::tibble(x = c("a", "b"), n = c(1, 2))
+df
 
+uncount(df, n)
 ```
 
 
 `drop_na` and `replace_na`
-
+drop rows with na or replace na with some values
 ```{r}
+
 
 ```
 
